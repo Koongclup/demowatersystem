@@ -1,0 +1,83 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Ensure that the .htaccess file itself is visible and can be accessed only by the owner
+<Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+
+# Allow access to controllers directory without rewrites
+RewriteRule ^app/controllers/(.*)$ app/controllers/$1 [L]
+RewriteRule ^app/rountes/(.*)$ app/rountes/$1 [L]
+
+
+# Hide PHP file extensions (e.g., "example.php" becomes "example")
+# Redirect any URL that includes a .php extension to the URL without it
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Redirect URLs with ".php" to URLs without ".php" for SEO
+# For example, redirect "example.com/about.php" to "example.com/about"
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s([^.]+)\.php [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# Remove "index.php" from URLs for cleaner paths
+# For example, "example.com/index.php" becomes "example.com/"
+#RewriteRule ^index\.php$ / [R=301,L]
+
+# Force HTTPS (if needed)
+# Redirect all HTTP requests to HTTPS (uncomment if required)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Deny access to sensitive files and directories for security
+<FilesMatch "(^#.*#|\.(bak|config|sql|swp|ini|log|sh|inc|dist))$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block access to directories (optional, for added security)
+Options -Indexes
+
+# Caching rules to improve performance
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType text/x-javascript "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType application/x-javascript "access plus 1 year"
+</IfModule>
+
+# Enable Gzip compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/xml application/xhtml+xml application/rss+xml application/javascript application/x-javascript
+</IfModule>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Prevent image hotlinking
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourdomain.com/ [NC]
+RewriteRule \.(jpg|jpeg|png|gif)$ - [F,NC,L]
+
+# Set the default directory index file
+DirectoryIndex index.php index.html
+
+# Error document configurations (optional)
+ErrorDocument 403 /s11/src/errors/403.html
+ErrorDocument 404 /water-management/views/errors/404.html
+ErrorDocument 500 /errors/500.html
+
+
